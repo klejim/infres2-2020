@@ -1,0 +1,20 @@
+#!/bin/bash
+echo "xxxxxDRP postinst called with arguments: $@"
+case "$1" in
+	configure)
+		update-rc.d xxxxxDRP defaults
+		dpkg-trigger --no-await xxxxxDRP-restart
+	;;
+
+	triggered)
+		/etc/init.d/xxxxxDRP restart
+	;;
+
+	abort-upgrade|abort-remove|abort-deconfigure)
+	;;
+
+	*)
+		echo "ERROR: postinst called with unknown argument \"$1\"" >&2
+		exit 1
+	;;
+esac

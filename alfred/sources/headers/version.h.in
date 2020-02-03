@@ -1,0 +1,11 @@
+#pragma once
+
+std::string testouille("@PROJECT_NAME@");
+#define _nARCHITECTURE "@NARCH@"
+#define _nOS "@NOS@"
+#define _nCOMPONENT_NAME "@PROJECT_NAME@"
+
+#define _nBRANCH "@GIT_REFSPEC@"
+#define _nCOMMIT_TAG "@GIT_SHA1@"
+#define FULL_VERSION "@VERSION@"
+

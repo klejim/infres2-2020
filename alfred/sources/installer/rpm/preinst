@@ -1,0 +1,16 @@
+#!/bin/bash
+
+exit 0
+echo "xxxxxDRP preinst called with arguments: $@"
+case "$1" in
+	"1"|"2")
+	;;
+
+	"3")
+	;;
+
+	*)
+		echo "ERROR: preinst called with unknown argument \"$1\"" >&2
+		exit 1
+	;;
+esac

@@ -1,0 +1,19 @@
+#!/bin/bash
+#echo "xxxxxDRP postinst called with arguments: $@"
+case "$1" in
+	1)
+		chkconfig --add xxxxxDRP 
+	;;
+
+	2)
+		/etc/init.d/xxxxxDRP restart
+	;;
+
+	3)
+	;;
+
+	*)
+		echo "ERROR: postinst called with unknown argument \"$1\"" >&2
+		exit 0
+	;;
+esac

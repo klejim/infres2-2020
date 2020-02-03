@@ -1,0 +1,12 @@
+{
+	"unc_path_main_share": "\\\\main.example.com\\share_name",
+	"unc_path_failover_share": "\\\\failover.example.com\\share_name",
+	"share_login": "",
+	"share_password": "",
+	"poll_period_in_second": 10,
+	"mount_point": "Z",
+	"log_level_debug": false,
+	"cmd_exe_absolute_path": "C:\\Windows\\System32\\cmd.exe",
+	"max_time_for_dir_command_in_second": 10
+}
+
