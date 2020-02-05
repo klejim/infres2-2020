@@ -1,7 +1,24 @@
+import json
 import socketserver
 
-server_name = input("Server name : ")
+def read_config(filename):
+    conf = {}
+    try:
+        conf = json.loads(filename)
+    except (json.JSONDecodeError, IOError) as err:
+        conf = {
+            "server_name": "François"
+        }
+    finally:
+        return conf
 
+config = read_config("config.json")
+
+if "server_name" in config:
+    server_name = config["server_name"]
+else:
+    server_name = input("Server name : ")
+    
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).decode()
