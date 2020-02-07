@@ -10,12 +10,10 @@ import base
 import database as db
 
 
-# todo : base de données...
-#AUTHENTICATION_SALT = b'\x9f\xf9\xf1\xe9TT\x14Y\x9d\xa7\xc7\xaf'
-hashed_client_salts = {}
 db.connect_db("server_db.db")
-db.print_table("MESSAGES")
-db.print_table("MEMBERS")
+#db.print_table("MESSAGES")
+#db.print_table("MEMBERS")
+
 
 class MyServer(socketserver.TCPServer):
     def __init__(self, address, handler):
@@ -29,7 +27,6 @@ class MyServer(socketserver.TCPServer):
                 self.app.name = self.config["server_name"]
             else:
                 self.app.name = input("Server name : ")
-            #self.password = input("Mot de passe : ")
         else:
             self.ok = False
             self.server_close()
@@ -43,6 +40,7 @@ class MyServer(socketserver.TCPServer):
         if isinstance(value, ConnectionAbortedError):
             print("Connexion interrompue par le client")
 
+
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         # authentification du client
@@ -52,11 +50,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             client_name = data[0:30].strip().decode()
             client_msg = data[30:].strip().decode()
             client_display = "{}({})".format(client_name, self.client_address[0])
-            db.add_msg(client_name, client_msg)
             print("{} : {}".format(client_display, client_msg))
             msg = input(">>> ")
-            db.add_msg(self.server.app.name, msg)
-            db.print_table("MESSAGES")
             self.send(msg, save=True)
 
     def authenticate_client(self, client_name):
@@ -89,5 +84,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 if __name__ == "__main__":
     HOST, PORT = 'localhost', 999
     server = MyServer((HOST, PORT), MyTCPHandler)
+    print("Connecté en tant que", server.app.name)
     server.serve_forever()
     server.server_close()

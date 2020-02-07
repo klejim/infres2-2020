@@ -7,8 +7,9 @@ import sys
 sys.path.append("..")
 import base
 
-#SERVER_HA = b'\x9c\xf1\xa4\xa6\xb9\xd3\xa3<\xc5\xca\xb6\xd3o"[\xca\xfd\x94\xccaQ\xc8QR8\x96H\xb0\x1c\xc6\xa7M' 
+
 AUTHENTICATION_SALT = b'\xa6\x0b\x90\xc1UAh\xf5\x04\x03\x94\xd8'
+
 
 class MyClient(base.BaseApp):
     def __init__(self, config_file):
@@ -66,7 +67,8 @@ class MyClient(base.BaseApp):
                         print("Echec de l'authentification")
                         self.password = input("Mot de passe : ")
                 except (ConnectionResetError, ConnectionAbortedError) as err:
-                    print("Connexion interrompue par le serveur")    
+                    print("Connexion interrompue par le serveur")
+                    sys.exit(0)
 
 if __name__ == "__main__":
     client = MyClient("config.json")

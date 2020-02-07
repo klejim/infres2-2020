@@ -5,6 +5,7 @@ import os
 
 import database as db
 
+
 def read_config(filename):
     conf = None
     try:
@@ -14,8 +15,6 @@ def read_config(filename):
     finally:
         return conf
 
-class ConnectionStopped(Exception):
-    pass
 
 class BaseApp:
     def __init__(self, *args):

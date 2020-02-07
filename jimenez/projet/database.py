@@ -49,24 +49,24 @@ def add_test_users():
     SERVER_HA = b'\x9c\xf1\xa4\xa6\xb9\xd3\xa3<\xc5\xca\xb6\xd3o"[\xca\xfd\x94\xccaQ\xc8QR8\x96H\xb0\x1c\xc6\xa7M'
     CLIENT_HA = b'L\xa0\x8e\x04\xac\xda\x0fh\x9d\xa1A\xbb\x10\xfc\xfePI\xfa\x19\xda\x9bW\xf0\x8b\x91\xcd%j\x84UF\x04'
     add_user('Jean', CLIENT_HA)
-    add_user('François', SERVER_HA)
+    add_user('Jacques', SERVER_HA)
 
 def add_user(user_name, user_hash):
-    print("adding user", user_name, user_hash)
+    #print("adding user", user_name, user_hash)
     c = conn.cursor()
     c.execute("INSERT INTO MEMBERS (member_name, member_hash) VALUES(:name,:hash)",
                   {"name": user_name, "hash": memoryview(user_hash)})
     conn.commit()
 
 def get_user_hash(user_name):
-    print("user name=({})".format(user_name))
+    #print("user name=({})".format(user_name))
     c = conn.cursor()
     c.execute("SELECT member_hash FROM MEMBERS WHERE member_name=:name",
               {"name": user_name})
     return c.fetchone()[0]
 
 def add_msg(user_name, content):
-    print("adding msg ({}), ({})".format(user_name, content))
+    #print("adding msg ({}), ({})".format(user_name, content))
     c = conn.cursor()
     c.execute("INSERT INTO MESSAGES (member_name, message_content) VALUES (:name, :content)", 
               {"name": user_name, "content": content})
