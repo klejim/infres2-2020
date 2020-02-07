@@ -13,22 +13,21 @@ AUTHENTICATION_SALT = b'\xa6\x0b\x90\xc1UAh\xf5\x04\x03\x94\xd8'
 class MyClient(base.BaseApp):
     def __init__(self, config_file):
         super().__init__()
-        print("config", config_file)
         self.config = base.read_config(config_file)
-        print("config : ", self.config)
+        self.log("config : ", self.config)
         if self.config is not None:
             self.ok = True
             self.server_address = self.config["server_address"]
             self.server_port = self.config["server_port"]
-            if "key" not in self.config:
+            if "key" not in self.config.keys():
                 print("Clef de chiffrement absente du fichier config")
                 self.ok = False
             else:
                 self.key = self.config["key"]
             if "client_name" not in self.config:
-                self.name = self.config["client_name"]
-            else:
                 self.name = input("Your name : ")
+            else:
+                self.name = self.config["client_name"]
             self.password = input("Mot de passe : ")          
         else:
             self.ok = False
