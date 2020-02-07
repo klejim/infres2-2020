@@ -3,6 +3,8 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import json
 import os
 
+import database as db
+
 def read_config(filename):
     conf = None
     try:
@@ -11,6 +13,9 @@ def read_config(filename):
         print("Erreur dans le fichier cong : ", err)
     finally:
         return conf
+
+class ConnectionStopped(Exception):
+    pass
 
 class BaseApp:
     def __init__(self, *args):
@@ -30,7 +35,7 @@ class BaseApp:
     def decrypt(self, data, noonce):
         return self.aesgcm.decrypt(noonce, data, b'')
 
-    def send(self, msg, sckt):
+    def send(self, msg, sckt, save=False):
         self.log("=== send ===")
         if isinstance(msg, str):
             msg = msg.encode()
@@ -38,16 +43,23 @@ class BaseApp:
         content = name + msg
         self.log("content = ", content)
         encrypted_content, noonce = self.encrypt(content)
+        if save and db.conn is not None:
+            db.add_msg(self.name, encrypted_content)
         self.log("content chiffré = ", encrypted_content)
         sckt.sendall(noonce + encrypted_content)
         
-
-    def receive(self, sckt):
+    def receive(self, sckt, save=False):
+        text = None
         answer = sckt.recv(1024)
+        if not answer:
+            raise ConnectionAbortedError    
         self.log("===receive===")
         # les douze premiers octets sont le nonnce
         nonnce, content = answer[:12], answer[12:]
         self.log("nonnce = {}, content = {}".format(nonnce, content))
         text = self.decrypt(content, nonnce)
         self.log("texte déchiffré = ", text)
+        name = text[:30].strip()
+        if save and db.conn is not None:
+            db.add_msg(name, content)
         return text

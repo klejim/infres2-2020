@@ -55,17 +55,19 @@ class MyClient(base.BaseApp):
             with socket.socket(socket.AF_INET) as sock:
                 sock.connect((self.server_address, self.server_port))
                 # L'envoi du message est précédé de l'étape d'authentification
-                if self.authenticate_self(sock):
-                    msg = input(">>> ")
-                    self.send(msg, sock)
-                    answer = self.receive(sock)
-                    server_name = answer[:30].strip().decode()
-                    server_msg = answer[30:].strip().decode()
-                    print("{} : {}".format(server_name, server_msg))
-                else:
-                    print("Echec de l'authentification")
-                    self.password = input("Mot de passe")
-                    
+                try:
+                    if self.authenticate_self(sock):
+                        msg = input(">>> ")
+                        self.send(msg, sock)
+                        answer = self.receive(sock)
+                        server_name = answer[:30].strip().decode()
+                        server_msg = answer[30:].strip().decode()
+                        print("{} : {}".format(server_name, server_msg))
+                    else:
+                        print("Echec de l'authentification")
+                        self.password = input("Mot de passe : ")
+                except (ConnectionResetError, ConnectionAbortedError) as err:
+                    print("Connexion interrompue par le serveur")    
 
 if __name__ == "__main__":
     client = MyClient("config.json")

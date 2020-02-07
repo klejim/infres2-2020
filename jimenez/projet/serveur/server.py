@@ -7,11 +7,15 @@ import socketserver
 import sys
 sys.path.append("..")
 import base
+import database as db
+
 
 # todo : base de données...
-CLIENT_HA = b'L\xa0\x8e\x04\xac\xda\x0fh\x9d\xa1A\xbb\x10\xfc\xfePI\xfa\x19\xda\x9bW\xf0\x8b\x91\xcd%j\x84UF\x04'
 #AUTHENTICATION_SALT = b'\x9f\xf9\xf1\xe9TT\x14Y\x9d\xa7\xc7\xaf'
 hashed_client_salts = {}
+db.connect_db("server_db.db")
+db.print_table("MESSAGES")
+db.print_table("MEMBERS")
 
 class MyServer(socketserver.TCPServer):
     def __init__(self, address, handler):
@@ -25,7 +29,7 @@ class MyServer(socketserver.TCPServer):
                 self.app.name = self.config["server_name"]
             else:
                 self.app.name = input("Server name : ")
-            self.password = input("Mot de passe : ")
+            #self.password = input("Mot de passe : ")
         else:
             self.ok = False
             self.server_close()
@@ -33,45 +37,53 @@ class MyServer(socketserver.TCPServer):
     def validate_config(self):
         pass
 
+    def handle_error(self, *args):
+        # gestion de l'exception levée si la connection est interrompue
+        etype, value = sys.exc_info()[:2]
+        if isinstance(value, ConnectionAbortedError):
+            print("Connexion interrompue par le client")
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         # authentification du client
-        client_name = self.request.recv(1024)
+        client_name = self.receive()[:30].decode().strip()
         if self.authenticate_client(client_name):
-            data = self.receive()
+            data = self.receive(save=True)
             client_name = data[0:30].strip().decode()
             client_msg = data[30:].strip().decode()
             client_display = "{}({})".format(client_name, self.client_address[0])
+            db.add_msg(client_name, client_msg)
             print("{} : {}".format(client_display, client_msg))
             msg = input(">>> ")
-            self.send(msg)
+            db.add_msg(self.server.app.name, msg)
+            db.print_table("MESSAGES")
+            self.send(msg, save=True)
 
     def authenticate_client(self, client_name):
-        self.app.log("authenticating client", client_name)
+        self.server.app.log("authenticating client", client_name)
         # envoi du challenge
-        self.app.log(CLIENT_HA)
-        self.app.log()
+        Ha = db.get_user_hash(client_name)
+        self.server.app.log("Ha from db : ", Ha)
         challenge = os.urandom(12)
-        self.app.log("sending challenge : ", challenge)
+        self.server.app.log("sending challenge : ", challenge)
         self.send(challenge)
-        # calcu H(challenge+Ha)
+        # calcul H(challenge+Ha)
         h = hashlib.sha256()
-        h.update(challenge + CLIENT_HA)
+        h.update(challenge + Ha)
         Hr = h.digest()
         Hr_client = self.receive()[30:]
-        self.app.log("Hr from client : ", Hr_client)
-        self.app.log("Hr : ", Hr)
+        self.server.app.log("Hr from client : ", Hr_client)
+        self.server.app.log("Hr : ", Hr)
         ok = Hr == Hr_client
-        self.app.log(ok)
+        self.server.app.log(ok)
         self.send("OK" if ok else "NOPE")
         return ok
     
-    def receive(self):
-        return self.server.app.receive(self.request)
+    def receive(self, save=False):
+        return self.server.app.receive(self.request, save)
 
-    def send(self, msg):
-        self.server.app.send(msg, self.request)
+    def send(self, msg, save=False):
+        self.server.app.send(msg, self.request, save)
     
 
 if __name__ == "__main__":
